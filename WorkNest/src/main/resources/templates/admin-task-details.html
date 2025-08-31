@@ -59,26 +59,30 @@
       color: #1e293b;
       cursor: pointer;
     }
-    .status-dropdown:focus {
-      outline: none;
-      border-color: #3b82f6;
-      box-shadow: 0 0 0 3px rgba(59,130,246,0.1);
-    }
     .update-btn {
       background: linear-gradient(135deg,#3b82f6,#1d4ed8);
-      color: white;
-      border: none;
-      padding: 8px 14px;
-      border-radius: 8px;
-      font-size: 13px;
-      font-weight: 600;
-      cursor: pointer;
+      color: white; border: none; padding: 8px 14px; border-radius: 8px;
+      font-size: 13px; font-weight: 600; cursor: pointer;
       display:flex; align-items:center; gap:6px;
     }
     .update-btn:hover {
       background: linear-gradient(135deg,#2563eb,#1e40af);
       transform: translateY(-1px);
       box-shadow: 0 4px 12px rgba(59,130,246,0.3);
+    }
+
+    /* Delete button */
+    .delete-btn {
+      background: linear-gradient(135deg,#ef4444,#b91c1c);
+      color: white; border: none; padding: 10px 16px;
+      border-radius: 8px; font-size: 14px; font-weight: 600;
+      cursor: pointer; display:flex; align-items:center; gap:6px;
+      margin-top:20px;
+    }
+    .delete-btn:hover {
+      background: linear-gradient(135deg,#dc2626,#991b1b);
+      transform: translateY(-1px);
+      box-shadow: 0 4px 12px rgba(239,68,68,0.3);
     }
 
     /* Assignees */
@@ -175,6 +179,11 @@
           <div class="meta-value" th:text="${#temporals.format(task.dueDate,'MMM dd, yyyy')}">Jan 02, 2025</div>
         </div>
       </div>
+
+      <!-- Delete button -->
+      <form th:action="@{'/admin/tasks/' + ${task.id} + '/delete'}" method="post" onsubmit="return confirm('Are you sure you want to delete this task?');">
+        <button type="submit" class="delete-btn"><i class="fas fa-trash"></i> Delete Task</button>
+      </form>
     </div>
 
     <!-- Description -->
