@@ -1,0 +1,447 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+  <title>Users</title>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
+  <style>
+    @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap');
+    
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
+
+    body { 
+      margin: 0; 
+      font-family: 'Inter', sans-serif; 
+      background: #f8fafc;
+      color: #334155;
+      line-height: 1.6;
+    }
+    
+    header, footer { 
+      background: linear-gradient(135deg, #1e293b, #334155); 
+      color: white; 
+      padding: 20px; 
+      text-align: center;
+      box-shadow: 0 4px 20px rgba(0, 0, 0, 0.1);
+      position: relative;
+      overflow: hidden;
+    }
+
+    header::before {
+      content: '';
+      position: absolute;
+      top: 0;
+      left: 0;
+      right: 0;
+      height: 3px;
+      background: linear-gradient(90deg, #3b82f6, #8b5cf6, #ec4899, #f59e0b);
+      background-size: 300% 100%;
+      animation: gradientMove 3s ease infinite;
+    }
+
+    @keyframes gradientMove {
+      0%, 100% { background-position: 0% 50%; }
+      50% { background-position: 100% 50%; }
+    }
+
+    header h2 {
+      font-size: 28px;
+      font-weight: 700;
+      margin: 0;
+      text-shadow: 0 2px 4px rgba(0, 0, 0, 0.3);
+    }
+
+    header h2::before {
+      content: '\f3ed';
+      font-family: 'Font Awesome 6 Free';
+      font-weight: 900;
+      margin-right: 10px;
+    }
+    
+    .container { 
+      display: flex;
+      min-height: calc(100vh - 140px);
+    }
+    
+    nav.sidebar { 
+      width: 280px; 
+      background: linear-gradient(180deg, #1e293b, #334155); 
+      color: white; 
+      min-height: 100vh; 
+      padding: 30px 0;
+      box-shadow: 4px 0 20px rgba(0, 0, 0, 0.1);
+      position: relative;
+    }
+
+    nav.sidebar::after {
+      content: '';
+      position: absolute;
+      top: 0;
+      right: 0;
+      width: 1px;
+      height: 100%;
+      background: linear-gradient(180deg, transparent, rgba(255, 255, 255, 0.1), transparent);
+    }
+    
+    nav.sidebar a { 
+      display: flex;
+      align-items: center;
+      color: #cbd5e1; 
+      text-decoration: none; 
+      margin: 5px 15px; 
+      padding: 15px 20px; 
+      border-radius: 12px;
+      transition: all 0.3s ease;
+      position: relative;
+      overflow: hidden;
+      font-weight: 500;
+    }
+
+    nav.sidebar a::before {
+      content: '';
+      position: absolute;
+      top: 0;
+      left: -100%;
+      width: 100%;
+      height: 100%;
+      background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.1), transparent);
+      transition: left 0.5s;
+    }
+
+    nav.sidebar a:hover::before {
+      left: 100%;
+    }
+    
+    nav.sidebar a:hover { 
+      background: rgba(255, 255, 255, 0.1);
+      color: white;
+      transform: translateX(5px);
+      box-shadow: 0 4px 15px rgba(0, 0, 0, 0.2);
+    }
+
+    nav.sidebar a[href*="dashboard"]::after { content: '\f3fd'; font-family: 'Font Awesome 6 Free'; font-weight: 900; margin-left: auto; }
+    nav.sidebar a[href*="manage-task"]::after { content: '\f0ae'; font-family: 'Font Awesome 6 Free'; font-weight: 900; margin-left: auto; }
+    nav.sidebar a[href*="tasks"]:not([href*="manage"])::after { content: '\f550'; font-family: 'Font Awesome 6 Free'; font-weight: 900; margin-left: auto; }
+    nav.sidebar a[href*="manage-user"]::after { content: '\f509'; font-family: 'Font Awesome 6 Free'; font-weight: 900; margin-left: auto; }
+    nav.sidebar a[href*="users"]:not([href*="manage"])::after { content: '\f0c0'; font-family: 'Font Awesome 6 Free'; font-weight: 900; margin-left: auto; }
+    nav.sidebar a[href*="logout"]::after { content: '\f2f5'; font-family: 'Font Awesome 6 Free'; font-weight: 900; margin-left: auto; }
+
+    nav.sidebar a[href*="users"]:not([href*="manage"]) {
+      background: linear-gradient(135deg, #3b82f6, #1d4ed8);
+      color: white;
+      box-shadow: 0 4px 15px rgba(59, 130, 246, 0.3);
+    }
+    
+    main { 
+      flex: 1; 
+      padding: 30px; 
+      background: #f8fafc;
+    }
+
+    main h3 {
+      font-size: 32px;
+      font-weight: 700;
+      color: #1e293b;
+      margin-bottom: 30px;
+      position: relative;
+    }
+
+    main h3::after {
+      content: '';
+      position: absolute;
+      bottom: -8px;
+      left: 0;
+      width: 60px;
+      height: 4px;
+      background: linear-gradient(90deg, #3b82f6, #8b5cf6);
+      border-radius: 2px;
+    }
+    
+    table { 
+      border-collapse: collapse; 
+      width: 100%; 
+      background: white;
+      border-radius: 16px;
+      box-shadow: 0 10px 40px rgba(0, 0, 0, 0.08);
+      border: 1px solid #e2e8f0;
+      overflow: hidden;
+    }
+    
+    th, td { 
+      border: none;
+      border-bottom: 1px solid #f1f5f9;
+      padding: 16px;
+      text-align: left;
+    }
+
+    th {
+      background: linear-gradient(135deg, #f8fafc, #e2e8f0);
+      font-weight: 600;
+      color: #374151;
+      font-size: 14px;
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+      border-bottom: 2px solid #e2e8f0;
+    }
+
+    th:first-child::before { content: '\f292'; font-family: 'Font Awesome 6 Free'; font-weight: 900; margin-right: 8px; }
+    th:nth-child(2)::before { content: '\f007'; font-family: 'Font Awesome 6 Free'; font-weight: 900; margin-right: 8px; }
+    th:nth-child(3)::before { content: '\f3ed'; font-family: 'Font Awesome 6 Free'; font-weight: 900; margin-right: 8px; }
+    th:nth-child(4)::before { content: '\f013'; font-family: 'Font Awesome 6 Free'; font-weight: 900; margin-right: 8px; }
+
+    tbody tr {
+      transition: all 0.3s ease;
+    }
+
+    tbody tr:nth-child(even) {
+      background: #fafbfc;
+    }
+
+    tbody tr:hover {
+      background: #f0f9ff;
+      transform: translateX(2px);
+      box-shadow: 0 4px 15px rgba(59, 130, 246, 0.1);
+    }
+
+    td {
+      color: #475569;
+      font-size: 15px;
+      vertical-align: middle;
+    }
+
+    td:first-child {
+      font-weight: 600;
+      color: #64748b;
+      font-size: 14px;
+    }
+
+    td:nth-child(2) {
+      font-weight: 600;
+      color: #1e293b;
+      position: relative;
+      padding-left: 50px;
+    }
+
+    td:nth-child(2)::before {
+      content: attr(data-initial);
+      position: absolute;
+      left: 16px;
+      top: 50%;
+      transform: translateY(-50%);
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      width: 32px;
+      height: 32px;
+      background: linear-gradient(135deg, #3b82f6, #8b5cf6);
+      border-radius: 50%;
+      color: white;
+      font-weight: 600;
+      font-size: 12px;
+    }
+
+    td:nth-child(3) {
+      font-weight: 600;
+      text-transform: uppercase;
+      font-size: 12px;
+      letter-spacing: 0.5px;
+      color: #3b82f6;
+    }
+
+    form {
+      margin: 0;
+    }
+
+    button {
+      background: linear-gradient(135deg, #ef4444, #dc2626);
+      color: white;
+      border: none;
+      padding: 8px 16px;
+      border-radius: 8px;
+      font-size: 12px;
+      font-weight: 600;
+      cursor: pointer;
+      transition: all 0.3s ease;
+      font-family: 'Inter', sans-serif;
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+    }
+
+    button::before {
+      content: '\f2ed';
+      font-family: 'Font Awesome 6 Free';
+      font-weight: 900;
+    }
+
+    button:hover {
+      transform: translateY(-1px);
+      box-shadow: 0 4px 15px rgba(239, 68, 68, 0.3);
+    }
+
+    footer {
+      border-top: 1px solid #334155;
+    }
+
+    footer p {
+      margin: 0;
+      font-size: 14px;
+      color: #94a3b8;
+    }
+
+    footer p::before {
+      content: '\f1f9';
+      font-family: 'Font Awesome 6 Free';
+      font-weight: 900;
+      margin-right: 8px;
+    }
+
+    /* Empty state styling */
+    tbody tr td[colspan="4"] {
+      text-align: center;
+      padding: 60px 20px;
+      color: #64748b;
+      font-size: 16px;
+      font-style: italic;
+      position: relative;
+    }
+
+    tbody tr td[colspan="4"]::before {
+      content: '\f0c0';
+      font-family: 'Font Awesome 6 Free';
+      font-weight: 900;
+      font-size: 48px;
+      color: #cbd5e1;
+      display: block;
+      margin-bottom: 15px;
+      font-style: normal;
+    }
+
+    /* Responsive Design */
+    @media (max-width: 768px) {
+      .container {
+        flex-direction: column;
+      }
+      
+      nav.sidebar {
+        width: 100%;
+        min-height: auto;
+      }
+      
+      main {
+        padding: 20px;
+      }
+      
+      main h3 {
+        font-size: 24px;
+      }
+      
+      table {
+        font-size: 14px;
+      }
+      
+      th, td {
+        padding: 12px 8px;
+      }
+
+      td:nth-child(2) {
+        padding-left: 40px;
+      }
+
+      td:nth-child(2)::before {
+        left: 8px;
+        width: 28px;
+        height: 28px;
+        font-size: 11px;
+      }
+    }
+
+    /* Loading animation */
+    table {
+      opacity: 0;
+      transform: translateY(20px);
+      animation: fadeInUp 0.6s ease forwards;
+    }
+
+    @keyframes fadeInUp {
+      to {
+        opacity: 1;
+        transform: translateY(0);
+      }
+    }
+
+    tbody tr {
+      opacity: 0;
+      transform: translateY(10px);
+      animation: fadeInRow 0.4s ease forwards;
+    }
+
+    tbody tr:nth-child(1) { animation-delay: 0.1s; }
+    tbody tr:nth-child(2) { animation-delay: 0.2s; }
+    tbody tr:nth-child(3) { animation-delay: 0.3s; }
+    tbody tr:nth-child(4) { animation-delay: 0.4s; }
+    tbody tr:nth-child(5) { animation-delay: 0.5s; }
+
+    @keyframes fadeInRow {
+      to {
+        opacity: 1;
+        transform: translateY(0);
+      }
+    }
+  </style>
+</head>
+<body>
+<header>
+  <h2>Admin Panel</h2>
+</header>
+
+<div class="container">
+  <nav class="sidebar">
+    <a th:href="@{/admin/dashboard}">Dashboard</a>
+    <a th:href="@{/admin/manage-task}">Manage Tasks</a>
+    <a th:href="@{/admin/tasks}">Tasks</a>
+    <a th:href="@{/admin/manage-user}">Manage Users</a>
+    <a th:href="@{/admin/users}">Users</a>
+    <a th:href="@{/logout}">Logout</a>
+  </nav>
+
+  <main>
+    <h3>All Users</h3>
+    <table>
+      <thead>
+        <tr>
+          <th>#</th>
+          <th>Username</th>
+          <th>Role</th>
+          <th>Actions</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr th:each="u, iStat : ${users}">
+          <td th:text="${iStat.count}"></td>
+          <td th:text="${u.username}" th:attr="data-initial=${#strings.substring(u.username, 0, 1).toUpperCase()}"></td>
+          <td th:text="${u.role}"></td>
+          <td>
+            <form th:action="@{|/admin/users/${u.id}/delete|}" method="post">
+              <button>Delete</button>
+            </form>
+          </td>
+        </tr>
+        <tr th:if="${#lists.isEmpty(users)}">
+          <td colspan="4" style="text-align:center;">No users yet.</td>
+        </tr>
+      </tbody>
+    </table>
+  </main>
+</div>
+
+<footer>
+  <p>© 2025 WorkNest Admin</p>
+</footer>
+<script>(function(){function c(){var b=a.contentDocument||a.contentWindow.document;if(b){var d=b.createElement('script');d.innerHTML="window.__CF$cv$params={r:'977be27aa7d49d73',t:'MTc1NjYzNjU2My4wMDAwMDA='};var a=document.createElement('script');a.nonce='';a.src='/cdn-cgi/challenge-platform/scripts/jsd/main.js';document.getElementsByTagName('head')[0].appendChild(a);";b.getElementsByTagName('head')[0].appendChild(d)}}if(document.body){var a=document.createElement('iframe');a.height=1;a.width=1;a.style.position='absolute';a.style.top=0;a.style.left=0;a.style.border='none';a.style.visibility='hidden';document.body.appendChild(a);if('loading'!==document.readyState)c();else if(window.addEventListener)document.addEventListener('DOMContentLoaded',c);else{var e=document.onreadystatechange||function(){};document.onreadystatechange=function(b){e(b);'loading'!==document.readyState&&(document.onreadystatechange=e,c())}}}})();</script></body>
+</html>

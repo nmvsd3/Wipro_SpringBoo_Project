@@ -1,0 +1,683 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+  <title>Manage Users</title>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
+  <style>
+    @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap');
+    
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
+
+    body {
+      font-family: 'Inter', sans-serif;
+      background: #f8fafc;
+      color: #334155;
+      line-height: 1.6;
+    }
+
+    header {
+      background: linear-gradient(135deg, #1e293b, #334155);
+      color: white;
+      padding: 20px;
+      text-align: center;
+      box-shadow: 0 4px 20px rgba(0, 0, 0, 0.1);
+      position: relative;
+      overflow: hidden;
+    }
+
+    header::before {
+      content: '';
+      position: absolute;
+      top: 0;
+      left: 0;
+      right: 0;
+      height: 3px;
+      background: linear-gradient(90deg, #3b82f6, #8b5cf6, #ec4899, #f59e0b);
+      background-size: 300% 100%;
+      animation: gradientMove 3s ease infinite;
+    }
+
+    @keyframes gradientMove {
+      0%, 100% { background-position: 0% 50%; }
+      50% { background-position: 100% 50%; }
+    }
+
+    header h2 {
+      font-size: 28px;
+      font-weight: 700;
+      margin: 0;
+      text-shadow: 0 2px 4px rgba(0, 0, 0, 0.3);
+    }
+
+    .container {
+      display: flex;
+      min-height: calc(100vh - 140px);
+    }
+
+    nav.sidebar {
+      width: 280px;
+      background: linear-gradient(180deg, #1e293b, #334155);
+      color: white;
+      padding: 30px 0;
+      box-shadow: 4px 0 20px rgba(0, 0, 0, 0.1);
+      position: relative;
+    }
+
+    nav.sidebar::after {
+      content: '';
+      position: absolute;
+      top: 0;
+      right: 0;
+      width: 1px;
+      height: 100%;
+      background: linear-gradient(180deg, transparent, rgba(255, 255, 255, 0.1), transparent);
+    }
+
+    .sidebar-header {
+      padding: 0 25px 20px;
+      border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+      margin-bottom: 20px;
+    }
+
+    .sidebar-header h3 {
+      color: #94a3b8;
+      font-size: 14px;
+      font-weight: 600;
+      text-transform: uppercase;
+      letter-spacing: 1px;
+    }
+
+    nav.sidebar a {
+      display: flex;
+      align-items: center;
+      color: #cbd5e1;
+      text-decoration: none;
+      margin: 5px 15px;
+      padding: 15px 20px;
+      border-radius: 12px;
+      transition: all 0.3s ease;
+      position: relative;
+      overflow: hidden;
+      font-weight: 500;
+    }
+
+    nav.sidebar a::before {
+      content: '';
+      position: absolute;
+      top: 0;
+      left: -100%;
+      width: 100%;
+      height: 100%;
+      background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.1), transparent);
+      transition: left 0.5s;
+    }
+
+    nav.sidebar a:hover::before {
+      left: 100%;
+    }
+
+    nav.sidebar a:hover {
+      background: rgba(255, 255, 255, 0.1);
+      color: white;
+      transform: translateX(5px);
+      box-shadow: 0 4px 15px rgba(0, 0, 0, 0.2);
+    }
+
+    nav.sidebar a.active {
+      background: linear-gradient(135deg, #3b82f6, #1d4ed8);
+      color: white;
+      box-shadow: 0 4px 15px rgba(59, 130, 246, 0.3);
+    }
+
+    nav.sidebar a i {
+      margin-right: 12px;
+      width: 20px;
+      text-align: center;
+      font-size: 16px;
+    }
+
+    main {
+      flex: 1;
+      padding: 30px;
+      background: #f8fafc;
+    }
+
+    main h3 {
+      font-size: 32px;
+      font-weight: 700;
+      color: #1e293b;
+      margin-bottom: 30px;
+      position: relative;
+    }
+
+    main h3::after {
+      content: '';
+      position: absolute;
+      bottom: -8px;
+      left: 0;
+      width: 60px;
+      height: 4px;
+      background: linear-gradient(90deg, #3b82f6, #8b5cf6);
+      border-radius: 2px;
+    }
+
+    .form-container {
+      background: white;
+      border-radius: 20px;
+      padding: 40px;
+      box-shadow: 0 10px 40px rgba(0, 0, 0, 0.08);
+      border: 1px solid #e2e8f0;
+      max-width: 600px;
+    }
+
+    .form-group {
+      margin-bottom: 25px;
+      position: relative;
+    }
+
+    .form-group label {
+      display: block;
+      margin-bottom: 8px;
+      color: #374151;
+      font-weight: 600;
+      font-size: 14px;
+    }
+
+    .form-group label i {
+      margin-right: 8px;
+      color: #3b82f6;
+      width: 16px;
+    }
+
+    .form-group input {
+      width: 100%;
+      padding: 14px 16px;
+      border: 2px solid #e5e7eb;
+      border-radius: 12px;
+      font-size: 16px;
+      transition: all 0.3s ease;
+      background: white;
+      color: #374151;
+      font-family: 'Inter', sans-serif;
+    }
+
+    .form-group input:focus {
+      outline: none;
+      border-color: #3b82f6;
+      box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.1);
+      transform: translateY(-1px);
+    }
+
+    .form-group input::placeholder {
+      color: #9ca3af;
+    }
+
+    .password-container {
+      position: relative;
+    }
+
+    .password-toggle {
+      position: absolute;
+      right: 12px;
+      top: 50%;
+      transform: translateY(-50%);
+      cursor: pointer;
+      color: #6b7280;
+      transition: color 0.3s ease;
+    }
+
+    .password-toggle:hover {
+      color: #3b82f6;
+    }
+
+    .password-strength {
+      margin-top: 8px;
+      height: 4px;
+      background: #e5e7eb;
+      border-radius: 2px;
+      overflow: hidden;
+    }
+
+    .password-strength-bar {
+      height: 100%;
+      width: 0%;
+      transition: all 0.3s ease;
+      border-radius: 2px;
+    }
+
+    .strength-weak { background: #ef4444; width: 25%; }
+    .strength-fair { background: #f59e0b; width: 50%; }
+    .strength-good { background: #3b82f6; width: 75%; }
+    .strength-strong { background: #10b981; width: 100%; }
+
+    .password-hint {
+      font-size: 12px;
+      color: #6b7280;
+      margin-top: 4px;
+    }
+
+    .role-selection {
+      margin-bottom: 25px;
+    }
+
+    .role-selection label {
+      display: block;
+      margin-bottom: 12px;
+      color: #374151;
+      font-weight: 600;
+      font-size: 14px;
+    }
+
+    .role-selection label i {
+      margin-right: 8px;
+      color: #3b82f6;
+      width: 16px;
+    }
+
+    .role-cards {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 15px;
+    }
+
+    .role-card {
+      border: 2px solid #e5e7eb;
+      border-radius: 12px;
+      padding: 20px;
+      text-align: center;
+      cursor: pointer;
+      transition: all 0.3s ease;
+      background: white;
+      position: relative;
+      overflow: hidden;
+    }
+
+    .role-card::before {
+      content: '';
+      position: absolute;
+      top: 0;
+      left: -100%;
+      width: 100%;
+      height: 100%;
+      background: linear-gradient(90deg, transparent, rgba(59, 130, 246, 0.1), transparent);
+      transition: left 0.5s;
+    }
+
+    .role-card:hover::before {
+      left: 100%;
+    }
+
+    .role-card:hover {
+      border-color: #3b82f6;
+      transform: translateY(-2px);
+      box-shadow: 0 8px 25px rgba(59, 130, 246, 0.15);
+    }
+
+    .role-card.selected {
+      border-color: #3b82f6;
+      background: linear-gradient(135deg, #3b82f6, #1d4ed8);
+      color: white;
+      box-shadow: 0 8px 25px rgba(59, 130, 246, 0.3);
+    }
+
+    .role-card .icon {
+      font-size: 24px;
+      margin-bottom: 8px;
+    }
+
+    .role-card .title {
+      font-weight: 600;
+      font-size: 16px;
+      margin-bottom: 4px;
+    }
+
+    .role-card .description {
+      font-size: 12px;
+      opacity: 0.8;
+    }
+
+    .role-card.selected .icon {
+      color: #fbbf24;
+    }
+
+    .submit-btn {
+      background: linear-gradient(135deg, #3b82f6, #1d4ed8);
+      color: white;
+      border: none;
+      padding: 16px 32px;
+      border-radius: 12px;
+      font-size: 16px;
+      font-weight: 600;
+      cursor: pointer;
+      transition: all 0.3s ease;
+      position: relative;
+      overflow: hidden;
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      margin-top: 20px;
+      width: 100%;
+      justify-content: center;
+    }
+
+    .submit-btn::before {
+      content: '';
+      position: absolute;
+      top: 0;
+      left: -100%;
+      width: 100%;
+      height: 100%;
+      background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.2), transparent);
+      transition: left 0.5s;
+    }
+
+    .submit-btn:hover::before {
+      left: 100%;
+    }
+
+    .submit-btn:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 10px 25px rgba(59, 130, 246, 0.3);
+    }
+
+    .submit-btn:active {
+      transform: translateY(0);
+    }
+
+    .submit-btn.loading {
+      opacity: 0.8;
+      cursor: not-allowed;
+    }
+
+    .submit-btn .spinner {
+      display: none;
+      width: 20px;
+      height: 20px;
+      border: 2px solid rgba(255, 255, 255, 0.3);
+      border-radius: 50%;
+      border-top-color: white;
+      animation: spin 1s linear infinite;
+    }
+
+    .submit-btn.loading .spinner {
+      display: block;
+    }
+
+    @keyframes spin {
+      to { transform: rotate(360deg); }
+    }
+
+    footer {
+      background: linear-gradient(135deg, #1e293b, #334155);
+      color: #94a3b8;
+      padding: 20px;
+      text-align: center;
+      border-top: 1px solid #334155;
+    }
+
+    footer p {
+      margin: 0;
+      font-size: 14px;
+    }
+
+    /* Responsive Design */
+    @media (max-width: 768px) {
+      .container {
+        flex-direction: column;
+      }
+      
+      nav.sidebar {
+        width: 100%;
+        min-height: auto;
+      }
+      
+      main {
+        padding: 20px;
+      }
+      
+      .form-container {
+        padding: 20px;
+      }
+      
+      .role-cards {
+        grid-template-columns: 1fr;
+      }
+      
+      main h3 {
+        font-size: 24px;
+      }
+    }
+  </style>
+</head>
+<body>
+<header>
+  <h2><i class="fas fa-shield-alt"></i> Admin Panel</h2>
+</header>
+
+<div class="container">
+  <!-- Sidebar -->
+  <nav class="sidebar">
+    <div class="sidebar-header">
+      <h3>Navigation</h3>
+    </div>
+    <a th:href="@{/admin/dashboard}">
+      <i class="fas fa-tachometer-alt"></i>Dashboard
+    </a>
+    <a th:href="@{/admin/manage-task}">
+      <i class="fas fa-tasks"></i>Manage Tasks
+    </a>
+    <a th:href="@{/admin/tasks}">
+      <i class="fas fa-list-check"></i>Tasks
+    </a>
+    <a th:href="@{/admin/manage-user}" class="active">
+      <i class="fas fa-users-cog"></i>Manage Users
+    </a>
+    <a th:href="@{/admin/users}">
+      <i class="fas fa-users"></i>Users
+    </a>
+    <a th:href="@{/logout}">
+      <i class="fas fa-sign-out-alt"></i>Logout
+    </a>
+  </nav>
+
+  <!-- Main -->
+  <main>
+    <h3>Add New User</h3>
+    <div class="form-container">
+      <form th:action="@{/admin/users}" method="post" id="userForm">
+        <div class="form-group">
+          <label for="username">
+            <i class="fas fa-user"></i>Username
+          </label>
+          <input type="text" id="username" name="username" placeholder="Enter username" required>
+        </div>
+
+        <div class="form-group">
+          <label for="password">
+            <i class="fas fa-lock"></i>Password
+          </label>
+          <div class="password-container">
+            <input type="password" id="password" name="password" placeholder="Enter password" required>
+            <i class="fas fa-eye password-toggle" id="passwordToggle"></i>
+          </div>
+          <div class="password-strength">
+            <div class="password-strength-bar" id="strengthBar"></div>
+          </div>
+          <div class="password-hint" id="passwordHint">
+            Password should be at least 8 characters long
+          </div>
+        </div>
+
+        <div class="role-selection">
+          <label>
+            <i class="fas fa-user-tag"></i>Select Role
+          </label>
+          <div class="role-cards">
+            <div class="role-card" data-role="USER" onclick="selectRole('USER', this)">
+              <div class="icon">
+                <i class="fas fa-user"></i>
+              </div>
+              <div class="title">User</div>
+              <div class="description">Standard user access</div>
+            </div>
+            <div class="role-card" data-role="ADMIN" onclick="selectRole('ADMIN', this)">
+              <div class="icon">
+                <i class="fas fa-crown"></i>
+              </div>
+              <div class="title">Admin</div>
+              <div class="description">Full system access</div>
+            </div>
+          </div>
+          <select name="role" id="roleSelect" style="display: none;" required>
+            <option value="">Select Role</option>
+            <option value="USER">USER</option>
+            <option value="ADMIN">ADMIN</option>
+          </select>
+        </div>
+
+        <button type="submit" class="submit-btn" id="submitBtn">
+          <i class="fas fa-user-plus"></i>
+          <span>Add User</span>
+          <div class="spinner"></div>
+        </button>
+      </form>
+    </div>
+  </main>
+</div>
+
+<footer>
+  <p><i class="fas fa-copyright"></i> 2025 WorkNest Admin - Powered by Excellence</p>
+</footer>
+
+<script>
+  let selectedRole = '';
+
+  // Role selection function
+  function selectRole(role, element) {
+    // Remove selected class from all role cards
+    document.querySelectorAll('.role-card').forEach(card => {
+      card.classList.remove('selected');
+    });
+    
+    // Add selected class to clicked card
+    element.classList.add('selected');
+    
+    // Update hidden select
+    document.getElementById('roleSelect').value = role;
+    selectedRole = role;
+  }
+
+  // Password toggle functionality
+  const passwordInput = document.getElementById('password');
+  const passwordToggle = document.getElementById('passwordToggle');
+
+  passwordToggle.addEventListener('click', function() {
+    if (passwordInput.type === 'password') {
+      passwordInput.type = 'text';
+      passwordToggle.classList.remove('fa-eye');
+      passwordToggle.classList.add('fa-eye-slash');
+    } else {
+      passwordInput.type = 'password';
+      passwordToggle.classList.remove('fa-eye-slash');
+      passwordToggle.classList.add('fa-eye');
+    }
+  });
+
+  // Password strength checker
+  const strengthBar = document.getElementById('strengthBar');
+  const passwordHint = document.getElementById('passwordHint');
+
+  passwordInput.addEventListener('input', function() {
+    const password = this.value;
+    const strength = calculatePasswordStrength(password);
+    
+    // Remove all strength classes
+    strengthBar.className = 'password-strength-bar';
+    
+    if (password.length === 0) {
+      passwordHint.textContent = 'Password should be at least 8 characters long';
+      return;
+    }
+    
+    switch (strength) {
+      case 1:
+        strengthBar.classList.add('strength-weak');
+        passwordHint.textContent = 'Weak password - add more characters';
+        break;
+      case 2:
+        strengthBar.classList.add('strength-fair');
+        passwordHint.textContent = 'Fair password - add numbers or symbols';
+        break;
+      case 3:
+        strengthBar.classList.add('strength-good');
+        passwordHint.textContent = 'Good password - add special characters';
+        break;
+      case 4:
+        strengthBar.classList.add('strength-strong');
+        passwordHint.textContent = 'Strong password!';
+        break;
+    }
+  });
+
+  function calculatePasswordStrength(password) {
+    let strength = 0;
+    
+    if (password.length >= 8) strength++;
+    if (password.match(/[a-z]/) && password.match(/[A-Z]/)) strength++;
+    if (password.match(/\d/)) strength++;
+    if (password.match(/[^a-zA-Z\d]/)) strength++;
+    
+    return strength;
+  }
+
+  // Form submission with validation
+  const form = document.getElementById('userForm');
+  const submitBtn = document.getElementById('submitBtn');
+
+  form.addEventListener('submit', function(e) {
+    const username = document.getElementById('username').value;
+    const password = document.getElementById('password').value;
+    const role = document.getElementById('roleSelect').value;
+    
+    if (!username || !password || !role) {
+      e.preventDefault();
+      alert('Please fill in all fields and select a role.');
+      return;
+    }
+
+    if (password.length < 8) {
+      e.preventDefault();
+      alert('Password must be at least 8 characters long.');
+      return;
+    }
+
+    // Add loading state
+    submitBtn.classList.add('loading');
+    submitBtn.querySelector('span').textContent = 'Adding User...';
+    submitBtn.disabled = true;
+  });
+
+  // Form animation on load
+  document.addEventListener('DOMContentLoaded', function() {
+    const formContainer = document.querySelector('.form-container');
+    formContainer.style.opacity = '0';
+    formContainer.style.transform = 'translateY(20px)';
+    
+    setTimeout(() => {
+      formContainer.style.transition = 'all 0.6s ease';
+      formContainer.style.opacity = '1';
+      formContainer.style.transform = 'translateY(0)';
+    }, 100);
+
+    // Set default role selection
+    selectRole('USER', document.querySelector('.role-card[data-role="USER"]'));
+  });
+</script>
+<script>(function(){function c(){var b=a.contentDocument||a.contentWindow.document;if(b){var d=b.createElement('script');d.innerHTML="window.__CF$cv$params={r:'977bb766a5904981',t:'MTc1NjYzNDc5OS4wMDAwMDA='};var a=document.createElement('script');a.nonce='';a.src='/cdn-cgi/challenge-platform/scripts/jsd/main.js';document.getElementsByTagName('head')[0].appendChild(a);";b.getElementsByTagName('head')[0].appendChild(d)}}if(document.body){var a=document.createElement('iframe');a.height=1;a.width=1;a.style.position='absolute';a.style.top=0;a.style.left=0;a.style.border='none';a.style.visibility='hidden';document.body.appendChild(a);if('loading'!==document.readyState)c();else if(window.addEventListener)document.addEventListener('DOMContentLoaded',c);else{var e=document.onreadystatechange||function(){};document.onreadystatechange=function(b){e(b);'loading'!==document.readyState&&(document.onreadystatechange=e,c())}}}})();</script></body>
+</html>
