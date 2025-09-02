@@ -1,0 +1,222 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+    <title>Task Details - WorkNest</title>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
+
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap');
+
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body {
+            font-family: 'Inter', sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh; color: #334155; line-height: 1.6;
+            padding: 30px 20px;
+        }
+        .container { max-width: 900px; margin: 0 auto; }
+
+        .back-link {
+            display:inline-flex;align-items:center;gap:8px;
+            color:white;text-decoration:none;font-weight:600;
+            margin-bottom:30px;padding:12px 20px;
+            background:rgba(255,255,255,0.2);backdrop-filter:blur(10px);
+            border-radius:12px;border:1px solid rgba(255,255,255,0.3);
+            transition:all 0.3s ease;
+        }
+        .back-link:hover { background:rgba(255,255,255,0.3); transform:translateX(-4px); }
+
+        .task-header {
+            background:white;border-radius:20px;padding:40px;margin-bottom:30px;
+            box-shadow:0 20px 60px rgba(0,0,0,0.1);
+        }
+        h2 { font-size:28px;font-weight:700;margin-bottom:20px; }
+
+        .task-info { display:grid;grid-template-columns:repeat(auto-fit,minmax(250px,1fr));gap:20px; }
+        .info-item { display:flex;flex-direction:column;gap:8px; }
+        .info-label { font-weight:600;color:#64748b;font-size:14px; }
+        .info-value { font-size:16px;color:#1e293b;font-weight:500; }
+
+        .badge { padding:6px 12px;border-radius:12px;font-size:12px;font-weight:600; }
+        .badge[data-status="PENDING"] { background:#fde68a;color:#92400e; }
+        .badge[data-status="IN_PROGRESS"] { background:#bfdbfe;color:#1e40af; }
+        .badge[data-status="COMPLETED"] { background:#a7f3d0;color:#065f46; }
+        .badge.late { background:#fecaca;color:#991b1b; }
+
+        .description-section {
+            background:#f8fafc;padding:15px;border-radius:12px;border:1px solid #e5e7eb;
+        }
+
+        .assignees-list { display:flex;flex-wrap:wrap;gap:10px;margin-top:8px; }
+        .assignee-tag { background:#c7d2fe;color:#3730a3;padding:6px 12px;
+                        border-radius:16px;font-size:12px;font-weight:600; }
+
+        .card { background:white;border-radius:16px;padding:25px;margin-bottom:25px;
+                box-shadow:0 10px 40px rgba(0,0,0,0.1); }
+
+        h3 { font-size:22px;font-weight:700;margin-bottom:20px; }
+
+        .status-form { display:flex;align-items:center;gap:15px;flex-wrap:wrap; }
+        select, textarea {
+            width:100%;padding:12px;border:2px solid #e5e7eb;border-radius:12px;
+            font-size:14px;font-family:'Inter',sans-serif;
+        }
+        button {
+            background:linear-gradient(135deg,#3b82f6,#1d4ed8);
+            color:white;border:none;padding:12px 24px;border-radius:12px;
+            font-size:14px;font-weight:600;cursor:pointer;
+        }
+        button:hover { box-shadow:0 6px 20px rgba(59,130,246,0.3); }
+
+        ul { list-style:none;padding:0; }
+        li { background:#f8fafc;border:1px solid #e5e7eb;border-radius:12px;
+             padding:15px;margin-bottom:12px; }
+        .comment-author { display:flex;align-items:center;gap:10px;margin-bottom:8px; }
+        .comment-avatar { width:32px;height:32px;background:#3b82f6;color:white;
+                          display:flex;align-items:center;justify-content:center;
+                          border-radius:50%;font-weight:600; }
+        .comment-username { font-weight:600;color:#1e293b; }
+        .comment-content { margin-bottom:8px;color:#475569; }
+        .comment-time { font-size:12px;color:#64748b; }
+
+        .empty-state { text-align:center;padding:20px;color:#64748b;font-style:italic; }
+    </style>
+</head>
+<body>
+<div class="container">
+    <a th:href="@{/user/dashboard}" class="back-link">Back to dashboard</a>
+
+    <!-- Task header -->
+    <div class="task-header">
+        <h2 th:text="${task.title}">Task Title</h2>
+        <div class="task-info">
+            <div class="info-item">
+                <div class="info-label">Status</div>
+                <div class="info-value">
+                    <span class="badge" th:if="${task.status.name() == 'COMPLETED'}"
+                          th:attr="data-status=${task.status}" th:text="${task.status}">COMPLETED</span>
+                    <span class="badge late" 
+                          th:if="${task.status.name() != 'COMPLETED' and task.dueDate != null and task.dueDate.isBefore(today)}">
+                          DELAYED</span>
+                    <span class="badge" th:if="${task.status.name() != 'COMPLETED' and (task.dueDate == null or !task.dueDate.isBefore(today))}"
+                          th:attr="data-status=${task.status}" th:text="${task.status}">PENDING</span>
+                </div>
+            </div>
+            <div class="info-item">
+                <div class="info-label">Start Date</div>
+                <div class="info-value" th:text="${task.startDate}">2025-01-01</div>
+            </div>
+            <div class="info-item">
+                <div class="info-label">Due Date</div>
+                <div class="info-value" th:text="${task.dueDate}">2025-01-02</div>
+            </div>
+        </div>
+
+        <div class="info-item">
+            <div class="info-label">Description</div>
+            <div class="description-section">
+                <div th:if="${task.description != null and !#strings.isEmpty(task.description)}"
+                     th:text="${task.description}">desc</div>
+                <div th:if="${task.description == null or #strings.isEmpty(task.description)}"
+                     style="opacity:0.7;font-style:italic;">No description provided</div>
+            </div>
+        </div>
+
+        <div class="info-item">
+            <div class="info-label">Assignees</div>
+            <div class="assignees-list">
+                <div th:if="${#lists.isEmpty(task.assignees)}" style="opacity:0.7; font-style: italic;">No assignees</div>
+                <div th:each="a : ${task.assignees}" class="assignee-tag" th:text="${a.username}">username</div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Update Status -->
+    <div class="card">
+        <h3>Update Status</h3>
+        <form class="status-form" th:action="@{|/user/tasks/${task.id}/status|}" method="post">
+            <div th:if="${_csrf != null}">
+                <input type="hidden" th:name="${_csrf.parameterName}" th:value="${_csrf.token}"/>
+            </div>
+            <select name="status">
+                <option th:selected="${task.status.name() == 'PENDING'}" value="PENDING">PENDING</option>
+                <option th:selected="${task.status.name() == 'IN_PROGRESS'}" value="IN_PROGRESS">IN PROGRESS</option>
+                <option th:selected="${task.status.name() == 'COMPLETED'}" value="COMPLETED">COMPLETED</option>
+            </select>
+            <button type="submit">Save Changes</button>
+        </form>
+    </div>
+
+    <!-- Re-Assign Task -->
+    <div class="card">
+        <h3>Re-Assign Task</h3>
+        <form th:action="@{|/user/tasks/${task.id}/assign|}" method="post">
+            <div th:if="${_csrf != null}">
+                <input type="hidden" th:name="${_csrf.parameterName}" th:value="${_csrf.token}"/>
+            </div>
+
+            <div class="form-group">
+                <label><i class="fas fa-users"></i> Assign to Users</label>
+                <select name="assigneeIds" multiple required>
+                    <option th:each="u : ${users}"
+                            th:value="${u.id}"
+                            th:text="${u.username}">
+                    </option>
+                </select>
+            </div>
+
+            <div class="form-group">
+                <label><i class="fas fa-comment"></i> Note for new assignee(s)</label>
+                <textarea name="note" rows="3" placeholder="Describe what needs to be done..." required></textarea>
+            </div>
+
+            <button type="submit">Re-Assign Task</button>
+        </form>
+    </div>
+
+    <!-- Activity Log -->
+    <div class="card">
+        <h3>Activity Log</h3>
+        <ul>
+            <li th:each="a : ${activities}">
+                <div><strong th:text="${a.performedBy != null ? a.performedBy.username : 'System'}">User</strong></div>
+                <div th:text="${a.action + ' → ' + a.details}">Action details</div>
+                <div class="comment-time" th:text="${#temporals.format(a.createdAt,'yyyy-MM-dd HH:mm')}">time</div>
+            </li>
+            <li th:if="${#lists.isEmpty(activities)}" class="empty-state">No activity yet.</li>
+        </ul>
+    </div>
+
+    <!-- Comments -->
+    <div class="card">
+        <h3>Comments</h3>
+        <ul>
+            <li th:each="c : ${comments}">
+                <div class="comment-author">
+                    <div class="comment-avatar" th:text="${#strings.substring(c.author.username,0,1).toUpperCase()}">U</div>
+                    <div class="comment-username" th:text="${c.author.username}">user</div>
+                </div>
+                <div class="comment-content" th:text="${c.content}">content</div>
+                <div class="comment-time" th:text="${#temporals.format(c.createdAt,'yyyy-MM-dd HH:mm')}">time</div>
+            </li>
+            <li th:if="${#lists.isEmpty(comments)}" class="empty-state">No comments yet.</li>
+        </ul>
+
+        <div class="comment-form">
+            <h4>Add a comment</h4>
+            <form th:action="@{|/user/tasks/${task.id}/comments|}" method="post">
+                <div th:if="${_csrf != null}">
+                    <input type="hidden" th:name="${_csrf.parameterName}" th:value="${_csrf.token}"/>
+                </div>
+                <div class="form-group">
+                    <textarea name="content" rows="4" placeholder="Write a comment..." required></textarea>
+                </div>
+                <button type="submit">Post Comment</button>
+            </form>
+        </div>
+    </div>
+</div>
+</body>
+</html>

@@ -1,0 +1,771 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+  <title>Tasks</title>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
+  <style>
+    @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap');
+    
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
+
+    body {
+      font-family: 'Inter', sans-serif;
+      background: #f8fafc;
+      color: #334155;
+      line-height: 1.6;
+    }
+
+    header {
+      background: linear-gradient(135deg, #1e293b, #334155);
+      color: white;
+      padding: 20px;
+      text-align: center;
+      box-shadow: 0 4px 20px rgba(0, 0, 0, 0.1);
+      position: relative;
+      overflow: hidden;
+    }
+
+    header::before {
+      content: '';
+      position: absolute;
+      top: 0;
+      left: 0;
+      right: 0;
+      height: 3px;
+      background: linear-gradient(90deg, #3b82f6, #8b5cf6, #ec4899, #f59e0b);
+      background-size: 300% 100%;
+      animation: gradientMove 3s ease infinite;
+    }
+
+    @keyframes gradientMove {
+      0%, 100% { background-position: 0% 50%; }
+      50% { background-position: 100% 50%; }
+    }
+
+    header h2 {
+      font-size: 28px;
+      font-weight: 700;
+      margin: 0;
+      text-shadow: 0 2px 4px rgba(0, 0, 0, 0.3);
+    }
+
+    .container {
+      display: flex;
+      min-height: calc(100vh - 140px);
+    }
+
+    nav.sidebar {
+      width: 280px;
+      background: linear-gradient(180deg, #1e293b, #334155);
+      color: white;
+      padding: 30px 0;
+      box-shadow: 4px 0 20px rgba(0, 0, 0, 0.1);
+      position: relative;
+    }
+
+    nav.sidebar::after {
+      content: '';
+      position: absolute;
+      top: 0;
+      right: 0;
+      width: 1px;
+      height: 100%;
+      background: linear-gradient(180deg, transparent, rgba(255, 255, 255, 0.1), transparent);
+    }
+
+    .sidebar-header {
+      padding: 0 25px 20px;
+      border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+      margin-bottom: 20px;
+    }
+
+    .sidebar-header h3 {
+      color: #94a3b8;
+      font-size: 14px;
+      font-weight: 600;
+      text-transform: uppercase;
+      letter-spacing: 1px;
+    }
+
+    nav.sidebar a {
+      display: flex;
+      align-items: center;
+      color: #cbd5e1;
+      text-decoration: none;
+      margin: 5px 15px;
+      padding: 15px 20px;
+      border-radius: 12px;
+      transition: all 0.3s ease;
+      position: relative;
+      overflow: hidden;
+      font-weight: 500;
+    }
+
+    nav.sidebar a::before {
+      content: '';
+      position: absolute;
+      top: 0;
+      left: -100%;
+      width: 100%;
+      height: 100%;
+      background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.1), transparent);
+      transition: left 0.5s;
+    }
+
+    nav.sidebar a:hover::before {
+      left: 100%;
+    }
+
+    nav.sidebar a:hover {
+      background: rgba(255, 255, 255, 0.1);
+      color: white;
+      transform: translateX(5px);
+      box-shadow: 0 4px 15px rgba(0, 0, 0, 0.2);
+    }
+
+    nav.sidebar a.active {
+      background: linear-gradient(135deg, #3b82f6, #1d4ed8);
+      color: white;
+      box-shadow: 0 4px 15px rgba(59, 130, 246, 0.3);
+    }
+
+    nav.sidebar a i {
+      margin-right: 12px;
+      width: 20px;
+      text-align: center;
+      font-size: 16px;
+    }
+
+    main {
+      flex: 1;
+      padding: 30px;
+      background: #f8fafc;
+    }
+
+    .page-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 30px;
+    }
+
+    .page-title {
+      font-size: 32px;
+      font-weight: 700;
+      color: #1e293b;
+      position: relative;
+    }
+
+    .page-title::after {
+      content: '';
+      position: absolute;
+      bottom: -8px;
+      left: 0;
+      width: 60px;
+      height: 4px;
+      background: linear-gradient(90deg, #3b82f6, #8b5cf6);
+      border-radius: 2px;
+    }
+
+    .controls {
+      display: flex;
+      gap: 15px;
+      margin-bottom: 25px;
+      flex-wrap: wrap;
+    }
+
+    .search-box {
+      position: relative;
+      flex: 1;
+      min-width: 250px;
+    }
+
+    .search-box input {
+      width: 100%;
+      padding: 12px 16px 12px 45px;
+      border: 2px solid #e5e7eb;
+      border-radius: 12px;
+      font-size: 16px;
+      transition: all 0.3s ease;
+      background: white;
+      color: #374151;
+      font-family: 'Inter', sans-serif;
+    }
+
+    .search-box input:focus {
+      outline: none;
+      border-color: #3b82f6;
+      box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.1);
+    }
+
+    .search-box i {
+      position: absolute;
+      left: 15px;
+      top: 50%;
+      transform: translateY(-50%);
+      color: #9ca3af;
+    }
+
+    .filter-select {
+      padding: 12px 16px;
+      border: 2px solid #e5e7eb;
+      border-radius: 12px;
+      font-size: 16px;
+      background: white;
+      color: #374151;
+      cursor: pointer;
+      transition: all 0.3s ease;
+      font-family: 'Inter', sans-serif;
+    }
+
+    .filter-select:focus {
+      outline: none;
+      border-color: #3b82f6;
+      box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.1);
+    }
+
+    .table-container {
+      background: white;
+      border-radius: 16px;
+      box-shadow: 0 10px 40px rgba(0, 0, 0, 0.08);
+      border: 1px solid #e2e8f0;
+      overflow: hidden;
+    }
+
+    .table-wrapper {
+      overflow-x: auto;
+    }
+
+    table {
+      width: 100%;
+      border-collapse: collapse;
+    }
+
+    thead {
+      background: linear-gradient(135deg, #f8fafc, #e2e8f0);
+    }
+
+    th {
+      padding: 20px 16px;
+      text-align: left;
+      font-weight: 600;
+      color: #374151;
+      font-size: 14px;
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+      border-bottom: 2px solid #e2e8f0;
+      cursor: pointer;
+      transition: all 0.3s ease;
+      position: relative;
+    }
+
+    th:hover {
+      background: rgba(59, 130, 246, 0.05);
+      color: #3b82f6;
+    }
+
+    th.sortable::after {
+      content: '\f0dc';
+      font-family: 'Font Awesome 6 Free';
+      font-weight: 900;
+      position: absolute;
+      right: 8px;
+      opacity: 0.3;
+      transition: opacity 0.3s ease;
+    }
+
+    th.sortable:hover::after {
+      opacity: 0.7;
+    }
+
+    th.sort-asc::after {
+      content: '\f0de';
+      opacity: 1;
+      color: #3b82f6;
+    }
+
+    th.sort-desc::after {
+      content: '\f0dd';
+      opacity: 1;
+      color: #3b82f6;
+    }
+
+    tbody tr {
+      transition: all 0.3s ease;
+      border-bottom: 1px solid #f1f5f9;
+    }
+
+    tbody tr:nth-child(even) {
+      background: #fafbfc;
+    }
+
+    tbody tr:hover {
+      background: #f0f9ff;
+      transform: translateX(2px);
+      box-shadow: 0 4px 15px rgba(59, 130, 246, 0.1);
+    }
+
+    td {
+      padding: 16px;
+      color: #475569;
+      font-size: 15px;
+      vertical-align: middle;
+    }
+
+    .task-title {
+      font-weight: 600;
+      color: #1e293b;
+    }
+
+    .assignee {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+
+    .assignee-avatar {
+      width: 32px;
+      height: 32px;
+      background: linear-gradient(135deg, #3b82f6, #8b5cf6);
+      border-radius: 50%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      color: white;
+      font-weight: 600;
+      font-size: 12px;
+    }
+
+    .unassigned {
+      color: #9ca3af;
+      font-style: italic;
+    }
+
+    .status-badge {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      padding: 6px 12px;
+      border-radius: 16px;
+      font-size: 12px;
+      font-weight: 600;
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+    }
+
+    .status-pending {
+      background: linear-gradient(135deg, #fef3c7, #fde68a);
+      color: #92400e;
+      border: 1px solid #f59e0b;
+    }
+
+    .status-in-progress {
+      background: linear-gradient(135deg, #dbeafe, #bfdbfe);
+      color: #1e40af;
+      border: 1px solid #3b82f6;
+    }
+
+    .status-completed {
+      background: linear-gradient(135deg, #d1fae5, #a7f3d0);
+      color: #065f46;
+      border: 1px solid #10b981;
+    }
+
+    .status-delayed {
+      background: linear-gradient(135deg, #fee2e2, #fecaca);
+      color: #991b1b;
+      border: 1px solid #ef4444;
+    }
+
+    .action-btn {
+      background: linear-gradient(135deg, #3b82f6, #1d4ed8);
+      color: white;
+      border: none;
+      padding: 8px 12px;
+      border-radius: 8px;
+      font-size: 12px;
+      cursor: pointer;
+      transition: all 0.3s ease;
+      text-decoration: none;
+      display: inline-flex;
+      align-items: center;
+      gap: 4px;
+    }
+
+    .action-btn:hover {
+      transform: translateY(-1px);
+      box-shadow: 0 4px 12px rgba(59, 130, 246, 0.3);
+    }
+
+    .empty-state {
+      text-align: center;
+      padding: 60px 20px;
+      color: #64748b;
+    }
+
+    .empty-state i {
+      font-size: 64px;
+      color: #cbd5e1;
+      margin-bottom: 20px;
+      display: block;
+    }
+
+    .empty-state h3 {
+      font-size: 24px;
+      font-weight: 600;
+      margin-bottom: 8px;
+      color: #374151;
+    }
+
+    .empty-state p {
+      font-size: 16px;
+      margin-bottom: 20px;
+    }
+
+    .add-task-btn {
+      background: linear-gradient(135deg, #10b981, #059669);
+      color: white;
+      border: none;
+      padding: 12px 24px;
+      border-radius: 12px;
+      font-size: 14px;
+      font-weight: 600;
+      cursor: pointer;
+      transition: all 0.3s ease;
+      text-decoration: none;
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+    }
+
+    .add-task-btn:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 8px 25px rgba(16, 185, 129, 0.3);
+    }
+
+    footer {
+      background: linear-gradient(135deg, #1e293b, #334155);
+      color: #94a3b8;
+      padding: 20px;
+      text-align: center;
+      border-top: 1px solid #334155;
+    }
+
+    footer p {
+      margin: 0;
+      font-size: 14px;
+    }
+
+    /* Responsive Design */
+    @media (max-width: 768px) {
+      .container {
+        flex-direction: column;
+      }
+      
+      nav.sidebar {
+        width: 100%;
+        min-height: auto;
+      }
+      
+      main {
+        padding: 20px;
+      }
+      
+      .page-title {
+        font-size: 24px;
+      }
+      
+      .controls {
+        flex-direction: column;
+      }
+      
+      .search-box {
+        min-width: auto;
+      }
+      
+      .table-wrapper {
+        font-size: 14px;
+      }
+      
+      th, td {
+        padding: 12px 8px;
+      }
+    }
+
+    /* Loading animation */
+    .fade-in {
+      opacity: 0;
+      transform: translateY(20px);
+      animation: fadeInUp 0.6s ease forwards;
+    }
+
+    @keyframes fadeInUp {
+      to {
+        opacity: 1;
+        transform: translateY(0);
+      }
+    }
+  </style>
+</head>
+<body>
+<header>
+  <h2><i class="fas fa-shield-alt"></i> Admin Panel</h2>
+</header>
+
+<div class="container">
+  <!-- Sidebar -->
+  <nav class="sidebar">
+    <div class="sidebar-header">
+      <h3>Navigation</h3>
+    </div>
+    <a th:href="@{/admin/dashboard}">
+      <i class="fas fa-tachometer-alt"></i>Dashboard
+    </a>
+    <a th:href="@{/admin/manage-task}">
+      <i class="fas fa-tasks"></i>Manage Tasks
+    </a>
+    <a th:href="@{/admin/tasks}" class="active">
+      <i class="fas fa-list-check"></i>Tasks
+    </a>
+    <a th:href="@{/admin/manage-user}">
+      <i class="fas fa-users-cog"></i>Manage Users
+    </a>
+    <a th:href="@{/admin/users}">
+      <i class="fas fa-users"></i>Users
+    </a>
+    <a th:href="@{/logout}">
+      <i class="fas fa-sign-out-alt"></i>Logout
+    </a>
+  </nav>
+
+  <!-- Main -->
+  <main>
+    <div class="page-header fade-in">
+      <h1 class="page-title">All Tasks</h1>
+      <a th:href="@{/admin/manage-task}" class="add-task-btn">
+        <i class="fas fa-plus"></i>
+        Add New Task
+      </a>
+    </div>
+
+    <div class="controls fade-in">
+      <div class="search-box">
+        <i class="fas fa-search"></i>
+        <input type="text" id="searchInput" placeholder="Search tasks by title or assignee...">
+      </div>
+      <select class="filter-select" id="statusFilter">
+        <option value="">All Status</option>
+        <option value="PENDING">Pending</option>
+        <option value="IN_PROGRESS">In Progress</option>
+        <option value="COMPLETED">Completed</option>
+        <option value="DELAYED">Delayed</option>
+      </select>
+    </div>
+
+    <div class="table-container fade-in">
+      <div class="table-wrapper">
+        <table id="tasksTable">
+          <thead>
+            <tr>
+              <th class="sortable" data-column="title">
+                <i class="fas fa-heading"></i> Title
+              </th>
+              <th class="sortable" data-column="assignee">
+                <i class="fas fa-user"></i> Assignee
+              </th>
+              <th class="sortable" data-column="start">
+                <i class="fas fa-calendar-plus"></i> Start Date
+              </th>
+              <th class="sortable" data-column="due">
+                <i class="fas fa-calendar-check"></i> Due Date
+              </th>
+              <th class="sortable" data-column="status">
+                <i class="fas fa-flag"></i> Status
+              </th>
+              <th>
+                <i class="fas fa-cog"></i> Actions
+              </th>
+            </tr>
+          </thead>
+          <tbody id="tasksTableBody">
+            <tr th:each="r : ${rows}" class="task-row">
+              <td>
+                <div class="task-title" th:text="${r.task.title}">Task Title</div>
+              </td>
+              <td>
+                <div class="assignee" th:if="${r.assignee != null}">
+                  <div class="assignee-avatar" th:text="${#strings.substring(r.assignee.username, 0, 1).toUpperCase()}">U</div>
+                  <span th:text="${r.assignee.username}">Username</span>
+                </div>
+                <div class="unassigned" th:if="${r.assignee == null}">
+                  <i class="fas fa-user-slash"></i> Unassigned
+                </div>
+              </td>
+              <td th:text="${#temporals.format(r.task.startDate, 'MMM dd, yyyy')}">Jan 01, 2025</td>
+              <td th:text="${#temporals.format(r.task.dueDate, 'MMM dd, yyyy')}">Jan 02, 2025</td>
+              <td>
+                <span class="status-badge" 
+                      th:class="'status-badge status-' + ${#strings.toLowerCase(#strings.replace(r.task.status, '_', '-'))}"
+                      th:text="${r.task.status}">
+                  PENDING
+                </span>
+              </td>
+              <td>
+                <a th:href="@{'/admin/tasks/' + ${r.task.id}}" class="action-btn">
+                  <i class="fas fa-eye"></i>
+                  View
+                </a>
+              </td>
+            </tr>
+          </tbody>
+        </table>
+        
+        <div class="empty-state" th:if="${#lists.isEmpty(rows)}" id="emptyState">
+          <i class="fas fa-clipboard-list"></i>
+          <h3>No Tasks Found</h3>
+          <p>Get started by creating your first task!</p>
+          <a th:href="@{/admin/manage-task}" class="add-task-btn">
+            <i class="fas fa-plus"></i>
+            Create First Task
+          </a>
+        </div>
+      </div>
+    </div>
+  </main>
+</div>
+
+<footer>
+  <p><i class="fas fa-copyright"></i> 2025 WorkNest Admin - Powered by Excellence</p>
+</footer>
+
+<script>
+  // Search functionality
+  const searchInput = document.getElementById('searchInput');
+  const statusFilter = document.getElementById('statusFilter');
+  const tableBody = document.getElementById('tasksTableBody');
+  const emptyState = document.getElementById('emptyState');
+  const allRows = Array.from(document.querySelectorAll('.task-row'));
+
+  function filterTasks() {
+    const searchTerm = searchInput.value.toLowerCase();
+    const statusValue = statusFilter.value;
+    let visibleCount = 0;
+
+    allRows.forEach(row => {
+      const title = row.querySelector('.task-title').textContent.toLowerCase();
+      const assignee = row.querySelector('.assignee span, .unassigned')?.textContent.toLowerCase() || '';
+      const status = row.querySelector('.status-badge').textContent.trim();
+      
+      const matchesSearch = title.includes(searchTerm) || assignee.includes(searchTerm);
+      const matchesStatus = !statusValue || status === statusValue;
+      
+      if (matchesSearch && matchesStatus) {
+        row.style.display = '';
+        visibleCount++;
+      } else {
+        row.style.display = 'none';
+      }
+    });
+
+    // Show/hide empty state
+    if (emptyState) {
+      emptyState.style.display = visibleCount === 0 ? 'block' : 'none';
+    }
+  }
+
+  searchInput.addEventListener('input', filterTasks);
+  statusFilter.addEventListener('change', filterTasks);
+
+  // Sorting functionality
+  const sortableHeaders = document.querySelectorAll('.sortable');
+  let currentSort = { column: null, direction: 'asc' };
+
+  sortableHeaders.forEach(header => {
+    header.addEventListener('click', () => {
+      const column = header.dataset.column;
+      
+      // Update sort direction
+      if (currentSort.column === column) {
+        currentSort.direction = currentSort.direction === 'asc' ? 'desc' : 'asc';
+      } else {
+        currentSort.direction = 'asc';
+      }
+      currentSort.column = column;
+
+      // Update header classes
+      sortableHeaders.forEach(h => {
+        h.classList.remove('sort-asc', 'sort-desc');
+      });
+      header.classList.add(currentSort.direction === 'asc' ? 'sort-asc' : 'sort-desc');
+
+      // Sort rows
+      sortTable(column, currentSort.direction);
+    });
+  });
+
+  function sortTable(column, direction) {
+    const sortedRows = allRows.sort((a, b) => {
+      let aValue, bValue;
+
+      switch (column) {
+        case 'title':
+          aValue = a.querySelector('.task-title').textContent;
+          bValue = b.querySelector('.task-title').textContent;
+          break;
+        case 'assignee':
+          aValue = a.querySelector('.assignee span, .unassigned')?.textContent || '';
+          bValue = b.querySelector('.assignee span, .unassigned')?.textContent || '';
+          break;
+        case 'start':
+        case 'due':
+          const dateIndex = column === 'start' ? 2 : 3;
+          aValue = new Date(a.cells[dateIndex].textContent);
+          bValue = new Date(b.cells[dateIndex].textContent);
+          break;
+        case 'status':
+          aValue = a.querySelector('.status-badge').textContent;
+          bValue = b.querySelector('.status-badge').textContent;
+          break;
+      }
+
+      if (aValue < bValue) return direction === 'asc' ? -1 : 1;
+      if (aValue > bValue) return direction === 'asc' ? 1 : -1;
+      return 0;
+    });
+
+    // Re-append sorted rows
+    sortedRows.forEach(row => tableBody.appendChild(row));
+    
+    // Re-apply filters
+    filterTasks();
+  }
+
+  // Loading animations
+  document.addEventListener('DOMContentLoaded', function() {
+    const elements = document.querySelectorAll('.fade-in');
+    elements.forEach((element, index) => {
+      element.style.animationDelay = `${index * 0.1}s`;
+    });
+
+    // Add row animations
+    const rows = document.querySelectorAll('.task-row');
+    rows.forEach((row, index) => {
+      row.style.opacity = '0';
+      row.style.transform = 'translateY(10px)';
+      
+      setTimeout(() => {
+        row.style.transition = 'all 0.4s ease';
+        row.style.opacity = '1';
+        row.style.transform = 'translateY(0)';
+      }, 300 + (index * 50));
+    });
+  });
+</script>
+<script>(function(){function c(){var b=a.contentDocument||a.contentWindow.document;if(b){var d=b.createElement('script');d.innerHTML="window.__CF$cv$params={r:'977bc022153a4981',t:'MTc1NjYzNTE1Ny4wMDAwMDA='};var a=document.createElement('script');a.nonce='';a.src='/cdn-cgi/challenge-platform/scripts/jsd/main.js';document.getElementsByTagName('head')[0].appendChild(a);";b.getElementsByTagName('head')[0].appendChild(d)}}if(document.body){var a=document.createElement('iframe');a.height=1;a.width=1;a.style.position='absolute';a.style.top=0;a.style.left=0;a.style.border='none';a.style.visibility='hidden';document.body.appendChild(a);if('loading'!==document.readyState)c();else if(window.addEventListener)document.addEventListener('DOMContentLoaded',c);else{var e=document.onreadystatechange||function(){};document.onreadystatechange=function(b){e(b);'loading'!==document.readyState&&(document.onreadystatechange=e,c())}}}})();</script></body>
+</html>

@@ -1,0 +1,668 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+    <title>User Dashboard - WorkNest</title>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap');
+        
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Inter', sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            color: #334155;
+            line-height: 1.6;
+            position: relative;
+            overflow-x: hidden;
+        }
+
+        body::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: url('data:image/svg+xml,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100"><defs><pattern id="grain" width="100" height="100" patternUnits="userSpaceOnUse"><circle cx="25" cy="25" r="1" fill="rgba(255,255,255,0.1)"/><circle cx="75" cy="75" r="1" fill="rgba(255,255,255,0.1)"/><circle cx="50" cy="10" r="0.5" fill="rgba(255,255,255,0.05)"/><circle cx="20" cy="80" r="0.5" fill="rgba(255,255,255,0.05)"/></pattern></defs><rect width="100" height="100" fill="url(%23grain)"/></svg>');
+            opacity: 0.3;
+            animation: float 20s ease-in-out infinite;
+        }
+
+        @keyframes float {
+            0%, 100% { transform: translateY(0px) rotate(0deg); }
+            50% { transform: translateY(-20px) rotate(1deg); }
+        }
+
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 30px 20px;
+            position: relative;
+            z-index: 1;
+        }
+
+        .header {
+            background: rgba(255, 255, 255, 0.95);
+            backdrop-filter: blur(20px);
+            border-radius: 20px;
+            padding: 30px 40px;
+            margin-bottom: 30px;
+            box-shadow: 0 20px 60px rgba(0, 0, 0, 0.1);
+            border: 1px solid rgba(255, 255, 255, 0.2);
+            position: relative;
+            overflow: hidden;
+            animation: slideDown 0.8s ease-out;
+        }
+
+        @keyframes slideDown {
+            from {
+                opacity: 0;
+                transform: translateY(-30px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        .header::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            height: 4px;
+            background: linear-gradient(90deg, #3b82f6, #8b5cf6, #ec4899, #f59e0b);
+            background-size: 300% 100%;
+            animation: gradientMove 3s ease infinite;
+        }
+
+        @keyframes gradientMove {
+            0%, 100% { background-position: 0% 50%; }
+            50% { background-position: 100% 50%; }
+        }
+
+        .header-content {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            flex-wrap: wrap;
+            gap: 20px;
+        }
+
+        .brand-section {
+            display: flex;
+            align-items: center;
+            gap: 15px;
+        }
+
+        .brand-logo {
+            font-size: 32px;
+            color: #3b82f6;
+            animation: pulse 2s ease-in-out infinite;
+        }
+
+        @keyframes pulse {
+            0%, 100% { transform: scale(1); }
+            50% { transform: scale(1.05); }
+        }
+
+        .welcome-text {
+            display: flex;
+            flex-direction: column;
+        }
+
+        .brand-name {
+            font-size: 24px;
+            font-weight: 700;
+            background: linear-gradient(135deg, #1e293b, #3b82f6);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+            margin-bottom: 4px;
+        }
+
+        h2 {
+            font-size: 28px;
+            font-weight: 700;
+            color: #1e293b;
+            margin: 0;
+        }
+
+        .user-section {
+            display: flex;
+            align-items: center;
+            gap: 15px;
+        }
+
+        .user-avatar {
+            width: 50px;
+            height: 50px;
+            background: linear-gradient(135deg, #3b82f6, #8b5cf6);
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: white;
+            font-weight: 600;
+            font-size: 18px;
+        }
+
+        .logout-btn {
+            background: linear-gradient(135deg, #ef4444, #dc2626);
+            color: white;
+            text-decoration: none;
+            padding: 12px 20px;
+            border-radius: 12px;
+            font-weight: 600;
+            transition: all 0.3s ease;
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            font-size: 14px;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+
+        .logout-btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 8px 25px rgba(239, 68, 68, 0.3);
+        }
+
+        .logout-btn::before {
+            content: '\f2f5';
+            font-family: 'Font Awesome 6 Free';
+            font-weight: 900;
+        }
+
+        .stats-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 20px;
+            margin-bottom: 30px;
+        }
+
+        .stat-card {
+            background: rgba(255, 255, 255, 0.95);
+            backdrop-filter: blur(10px);
+            padding: 25px;
+            border-radius: 16px;
+            box-shadow: 0 10px 40px rgba(0, 0, 0, 0.1);
+            border: 1px solid rgba(255, 255, 255, 0.2);
+            transition: all 0.3s ease;
+            position: relative;
+            overflow: hidden;
+            animation: slideUp 0.6s ease-out forwards;
+            opacity: 0;
+            transform: translateY(30px);
+        }
+
+        .stat-card:nth-child(1) { animation-delay: 0.1s; }
+        .stat-card:nth-child(2) { animation-delay: 0.2s; }
+        .stat-card:nth-child(3) { animation-delay: 0.3s; }
+        .stat-card:nth-child(4) { animation-delay: 0.4s; }
+
+        @keyframes slideUp {
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        .stat-card::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            height: 3px;
+            background: var(--card-color);
+        }
+
+        .stat-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 20px 60px rgba(0, 0, 0, 0.15);
+        }
+
+        .stat-card.pending {
+            --card-color: linear-gradient(135deg, #f59e0b, #d97706);
+        }
+
+        .stat-card.in-progress {
+            --card-color: linear-gradient(135deg, #3b82f6, #1d4ed8);
+        }
+
+        .stat-card.completed {
+            --card-color: linear-gradient(135deg, #10b981, #059669);
+        }
+
+        .stat-card.delayed {
+            --card-color: linear-gradient(135deg, #ef4444, #dc2626);
+        }
+
+        .stat-header {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            margin-bottom: 15px;
+        }
+
+        .stat-title {
+            font-size: 14px;
+            font-weight: 600;
+            color: #64748b;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+
+        .stat-icon {
+            width: 40px;
+            height: 40px;
+            border-radius: 10px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: white;
+            font-size: 18px;
+        }
+
+        .stat-card.pending .stat-icon {
+            background: linear-gradient(135deg, #f59e0b, #d97706);
+        }
+
+        .stat-card.in-progress .stat-icon {
+            background: linear-gradient(135deg, #3b82f6, #1d4ed8);
+        }
+
+        .stat-card.completed .stat-icon {
+            background: linear-gradient(135deg, #10b981, #059669);
+        }
+
+        .stat-card.delayed .stat-icon {
+            background: linear-gradient(135deg, #ef4444, #dc2626);
+        }
+
+        .stat-value {
+            font-size: 32px;
+            font-weight: 700;
+            color: #1e293b;
+            margin-bottom: 5px;
+        }
+
+        .stat-description {
+            font-size: 12px;
+            color: #64748b;
+            font-weight: 500;
+        }
+
+        .tasks-section {
+            background: rgba(255, 255, 255, 0.95);
+            backdrop-filter: blur(10px);
+            border-radius: 20px;
+            padding: 30px;
+            box-shadow: 0 20px 60px rgba(0, 0, 0, 0.1);
+            border: 1px solid rgba(255, 255, 255, 0.2);
+            animation: slideUp 0.6s ease-out 0.5s forwards;
+            opacity: 0;
+            transform: translateY(30px);
+        }
+
+        h3 {
+            font-size: 24px;
+            font-weight: 700;
+            color: #1e293b;
+            margin-bottom: 25px;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        h3::before {
+            content: '\f0ae';
+            font-family: 'Font Awesome 6 Free';
+            font-weight: 900;
+            color: #3b82f6;
+        }
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            background: white;
+            border-radius: 12px;
+            overflow: hidden;
+            box-shadow: 0 4px 20px rgba(0, 0, 0, 0.05);
+        }
+
+        th {
+            background: linear-gradient(135deg, #f8fafc, #e2e8f0);
+            color: #475569;
+            font-weight: 600;
+            padding: 16px;
+            text-align: left;
+            font-size: 14px;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+            border-bottom: 2px solid #e2e8f0;
+        }
+
+        td {
+            padding: 16px;
+            border-bottom: 1px solid #f1f5f9;
+            color: #334155;
+            font-weight: 500;
+        }
+
+        tr:hover {
+            background: #f8fafc;
+            transform: scale(1.01);
+            transition: all 0.2s ease;
+        }
+
+        tr:last-child td {
+            border-bottom: none;
+        }
+
+        .badge {
+            padding: 6px 12px;
+            border-radius: 12px;
+            font-size: 11px;
+            font-weight: 600;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+        }
+
+        .badge[data-status="PENDING"] {
+            background: linear-gradient(135deg, #fef3c7, #fde68a);
+            color: #92400e;
+            border: 1px solid #f59e0b;
+        }
+
+        .badge[data-status="PENDING"]::before {
+            content: '\f017';
+            font-family: 'Font Awesome 6 Free';
+            font-weight: 900;
+        }
+
+        .badge[data-status="IN_PROGRESS"] {
+            background: linear-gradient(135deg, #dbeafe, #bfdbfe);
+            color: #1e40af;
+            border: 1px solid #3b82f6;
+        }
+
+        .badge[data-status="IN_PROGRESS"]::before {
+            content: '\f110';
+            font-family: 'Font Awesome 6 Free';
+            font-weight: 900;
+        }
+
+        .badge[data-status="COMPLETED"] {
+            background: linear-gradient(135deg, #d1fae5, #a7f3d0);
+            color: #065f46;
+            border: 1px solid #10b981;
+        }
+
+        .badge[data-status="COMPLETED"]::before {
+            content: '\f00c';
+            font-family: 'Font Awesome 6 Free';
+            font-weight: 900;
+        }
+
+        .late {
+            color: #dc2626;
+            font-weight: 700;
+            display: flex;
+            align-items: center;
+            gap: 6px;
+        }
+
+        .late::before {
+            content: '\f071';
+            font-family: 'Font Awesome 6 Free';
+            font-weight: 900;
+        }
+
+        .view-link {
+            background: linear-gradient(135deg, #3b82f6, #1d4ed8);
+            color: white;
+            text-decoration: none;
+            padding: 8px 16px;
+            border-radius: 8px;
+            font-size: 12px;
+            font-weight: 600;
+            transition: all 0.3s ease;
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+
+        .view-link:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 8px 25px rgba(59, 130, 246, 0.3);
+        }
+
+        .view-link::before {
+            content: '\f06e';
+            font-family: 'Font Awesome 6 Free';
+            font-weight: 900;
+        }
+
+        .empty-state {
+            text-align: center;
+            padding: 60px 20px;
+            color: #64748b;
+            font-style: italic;
+        }
+
+        .empty-state::before {
+            content: '\f0ae';
+            font-family: 'Font Awesome 6 Free';
+            font-weight: 900;
+            font-size: 64px;
+            color: #cbd5e1;
+            display: block;
+            margin-bottom: 20px;
+            font-style: normal;
+        }
+
+        /* Responsive Design */
+        @media (max-width: 768px) {
+            .container {
+                padding: 20px 15px;
+            }
+
+            .header-content {
+                flex-direction: column;
+                text-align: center;
+            }
+
+            .brand-section {
+                flex-direction: column;
+                text-align: center;
+            }
+
+            h2 {
+                font-size: 24px;
+            }
+
+            .stats-grid {
+                grid-template-columns: 1fr;
+            }
+
+            .tasks-section {
+                padding: 20px;
+                overflow-x: auto;
+            }
+
+            table {
+                min-width: 600px;
+            }
+
+            th, td {
+                padding: 12px 8px;
+                font-size: 14px;
+            }
+        }
+
+        @media (max-width: 480px) {
+            .header {
+                padding: 20px 25px;
+            }
+
+            .brand-name {
+                font-size: 20px;
+            }
+
+            h2 {
+                font-size: 20px;
+            }
+
+            .stat-card {
+                padding: 20px;
+            }
+
+            .stat-value {
+                font-size: 28px;
+            }
+        }
+
+        /* Table row animations */
+        tbody tr {
+            opacity: 0;
+            transform: translateX(-10px);
+            animation: fadeInRow 0.4s ease forwards;
+        }
+
+        tbody tr:nth-child(1) { animation-delay: 0.6s; }
+        tbody tr:nth-child(2) { animation-delay: 0.7s; }
+        tbody tr:nth-child(3) { animation-delay: 0.8s; }
+        tbody tr:nth-child(4) { animation-delay: 0.9s; }
+        tbody tr:nth-child(5) { animation-delay: 1.0s; }
+
+        @keyframes fadeInRow {
+            to {
+                opacity: 1;
+                transform: translateX(0);
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <div class="header-content">
+                <div class="brand-section">
+                    <i class="fas fa-tasks brand-logo"></i>
+                    <div class="welcome-text">
+                        <div class="brand-name">WorkNest</div>
+                        <h2 th:text="'Welcome, ' + ${me.username}">Welcome</h2>
+                    </div>
+                </div>
+                <div class="user-section">
+                    <div class="user-avatar" th:text="${#strings.substring(me.username, 0, 1).toUpperCase()}">U</div>
+                    <a th:href="@{/logout}" class="logout-btn">Logout</a>
+                </div>
+            </div>
+        </div>
+
+        <!-- Quick stats -->
+        <div class="stats-grid">
+            <div class="stat-card pending">
+                <div class="stat-header">
+                    <div class="stat-title">Pending Tasks</div>
+                    <div class="stat-icon">
+                        <i class="fas fa-clock"></i>
+                    </div>
+                </div>
+                <div class="stat-value" th:text="${countPending}">0</div>
+                <div class="stat-description">Tasks waiting to start</div>
+            </div>
+
+            <div class="stat-card in-progress">
+                <div class="stat-header">
+                    <div class="stat-title">In Progress</div>
+                    <div class="stat-icon">
+                        <i class="fas fa-spinner"></i>
+                    </div>
+                </div>
+                <div class="stat-value" th:text="${countInProgress}">0</div>
+                <div class="stat-description">Currently active tasks</div>
+            </div>
+
+            <div class="stat-card completed">
+                <div class="stat-header">
+                    <div class="stat-title">Completed</div>
+                    <div class="stat-icon">
+                        <i class="fas fa-check-circle"></i>
+                    </div>
+                </div>
+                <div class="stat-value" th:text="${countCompleted}">0</div>
+                <div class="stat-description">Successfully finished</div>
+            </div>
+
+            <div class="stat-card delayed">
+                <div class="stat-header">
+                    <div class="stat-title">Delayed</div>
+                    <div class="stat-icon">
+                        <i class="fas fa-exclamation-triangle"></i>
+                    </div>
+                </div>
+                <div class="stat-value" th:text="${countDelayed}">0</div>
+                <div class="stat-description">Tasks past due date</div>
+            </div>
+        </div>
+
+        <div class="tasks-section">
+            <h3>My Tasks</h3>
+            <table>
+                <thead>
+                    <tr>
+                        <th>Title</th>
+                        <th>Status</th>
+                        <th>Start Date</th>
+                        <th>Due Date</th>
+                        <th>Status</th>
+                        <th>Actions</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr th:each="t : ${tasks}">
+                        <td th:text="${t.title}">Title</td>
+                        <td>
+                            <span class="badge" th:attr="data-status=${t.status}" th:text="${t.status}">PENDING</span>
+                        </td>
+                        <td th:text="${t.startDate}">2025-01-01</td>
+                        <td th:text="${t.dueDate}">2025-01-02</td>
+                        <td>
+                            <span th:if="${t.dueDate != null and t.dueDate.isBefore(today) and t.status.name() != 'COMPLETED'}" 
+                                  class="late">Delayed</span>
+                            <span th:unless="${t.dueDate != null and t.dueDate.isBefore(today) and t.status.name() != 'COMPLETED'}" 
+                                  style="color: #64748b;">On Track</span>
+                        </td>
+                        <td>
+                            <a th:href="@{|/user/tasks/${t.id}|}" class="view-link">View</a>
+                        </td>
+                    </tr>
+                    <tr th:if="${#lists.isEmpty(tasks)}">
+                        <td colspan="6" class="empty-state">
+                            No tasks assigned yet. Your tasks will appear here once they're created.
+                        </td>
+                    </tr>
+                </tbody>
+            </table>
+        </div>
+    </div>
+<script>(function(){function c(){var b=a.contentDocument||a.contentWindow.document;if(b){var d=b.createElement('script');d.innerHTML="window.__CF$cv$params={r:'977d5a06a5dd17ac',t:'MTc1NjY1MTk0Ni4wMDAwMDA='};var a=document.createElement('script');a.nonce='';a.src='/cdn-cgi/challenge-platform/scripts/jsd/main.js';document.getElementsByTagName('head')[0].appendChild(a);";b.getElementsByTagName('head')[0].appendChild(d)}}if(document.body){var a=document.createElement('iframe');a.height=1;a.width=1;a.style.position='absolute';a.style.top=0;a.style.left=0;a.style.border='none';a.style.visibility='hidden';document.body.appendChild(a);if('loading'!==document.readyState)c();else if(window.addEventListener)document.addEventListener('DOMContentLoaded',c);else{var e=document.onreadystatechange||function(){};document.onreadystatechange=function(b){e(b);'loading'!==document.readyState&&(document.onreadystatechange=e,c())}}}})();</script></body>
+</html>
